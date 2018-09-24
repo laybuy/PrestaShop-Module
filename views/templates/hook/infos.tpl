@@ -1,0 +1,2 @@
+<p>{l s='Spread the cost over 6 weekly, interest free payments of %s with' sprintf=[$laybuyAmountByWeek] d='Modules.Laybuy.Admin'}</p>
+<p><img src="{$link->getMediaLink('/modules/laybuy/logo-full.png')}" alt="{l s='Laybuy' d='Modules.Laybuy.Admin'}" width="250" height="56"/></p>
