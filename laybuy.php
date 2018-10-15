@@ -56,7 +56,7 @@ class Laybuy extends PaymentModule
     {
         $this->name = 'laybuy';
         $this->tab = 'payments_gateways';
-        $this->version = '1.0.0';
+        $this->version = '1.1.0';
         $this->author = 'Laybuy';
         $this->controllers = array('payment', 'validation');
 
@@ -147,36 +147,32 @@ class Laybuy extends PaymentModule
      */
     public function install()
     {
-        if (parent::install()
+        $result = parent::install()
             && $this->registerHook('paymentOptions')
-            && $this->registerHook('displayAdminOrderLeft')) {
+            && $this->registerHook('displayProductButtons')
+            && $this->registerHook('displayAdminOrderLeft');
 
-            $query = '
-                CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'laybuy_orders` (
-                  `id` int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,
-                  `id_cart` int(11) NOT NULL,
-                  `token` varchar(128) NOT NULL,
-                  `laybuy_order_id` int(11) DEFAULT NULL,
-                  `current_state` enum(
-                    \''.LaybuyOrder::STATE_UNCONFIRMED.'\',
-                    \''.LaybuyOrder::STATE_CONFIRMED.'\',
-                    \''.LaybuyOrder::STATE_CANCELED.'\',
-                    \''.LaybuyOrder::STATE_ERROR.'\',
-                    \''.LaybuyOrder::STATE_REFUNDED.'\'
-                  ) NOT NULL DEFAULT \''.LaybuyOrder::STATE_UNCONFIRMED.'\',
-                  `date_add` datetime NOT NULL,
-                  `date_upd` datetime NOT NULL
-                ) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8;
-            ';
+        $query = '
+            CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'laybuy_orders` (
+              `id` int(11) NOT NULL,
+              `id_cart` int(11) NOT NULL,
+              `token` varchar(128) NOT NULL,
+              `laybuy_order_id` int(11) DEFAULT NULL,
+              `current_state` enum(
+                \''.LaybuyOrder::STATE_UNCONFIRMED.'\',
+                \''.LaybuyOrder::STATE_CONFIRMED.'\',
+                \''.LaybuyOrder::STATE_CANCELED.'\',
+                \''.LaybuyOrder::STATE_ERROR.'\',
+                \''.LaybuyOrder::STATE_REFUNDED.'\'
+              ) NOT NULL DEFAULT \''.LaybuyOrder::STATE_UNCONFIRMED.'\',
+              `date_add` datetime NOT NULL,
+              `date_upd` datetime NOT NULL
+            ) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8;
+        ';
 
-            if (!Db::getInstance()->execute($query)) {
-                return $this->uninstall();
-            }
+        $result &= Db::getInstance()->execute($query);
 
-            return true;
-        }
-
-        return false;
+        return $result;
     }
 
     /**
@@ -506,7 +502,7 @@ class Laybuy extends PaymentModule
         }
 
         $orderTotal = $params['cart']->getOrderTotal();
-        $orderTotal = \Tools::ps_round($orderTotal / 6, 2, PS_ROUND_UP);
+        $orderTotal = ceil($orderTotal / 6);
 
         $priceFormatter = new \PrestaShop\PrestaShop\Adapter\Product\PriceFormatter();
         $orderTotalFormatted = $priceFormatter->format($orderTotal);
@@ -521,6 +517,43 @@ class Laybuy extends PaymentModule
             ->setAdditionalInformation($this->fetch('module:laybuy/views/templates/hook/infos.tpl'));
 
         return [$newOption];
+    }
+
+    /**
+     * [FO]
+     *
+     * @param $params
+     *
+     * @return array|bool
+     */
+    public function hookDisplayProductButtons($params)
+    {
+        // Check cart
+        if (isset($params['cart'])
+            && Validate::isLoadedObject($params['cart'])
+            && !$this->isAuthorizedCart($params['cart'])) {
+            return false;
+        }
+
+        // Check product
+        if (!isset($params['product'])
+            || !isset($params['product']['price_amount'])
+            || 0 === $params['product']['price_amount']) {
+            return false;
+        }
+
+        // Divide price and format it
+        $productPriceDivided = ceil($params['product']['price_amount'] / 6);
+
+        $priceFormatter = new \PrestaShop\PrestaShop\Adapter\Product\PriceFormatter();
+        $productPriceDividedFormatted = $priceFormatter->format($productPriceDivided);
+
+
+        $this->context->smarty->assign([
+            'laybuyProductAmountByWeek' => $productPriceDividedFormatted
+        ]);
+
+        return $this->display(__FILE__,'views/templates/hook/product.tpl');
     }
 
     /**
