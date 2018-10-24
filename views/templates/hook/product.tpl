@@ -1,9 +1,8 @@
-<div class="row p-y-1">
-    <div class="col-md-4">
-        <img src="{$link->getMediaLink('/modules/laybuy/logo-full.png')}" alt="{l s='Laybuy' d='Modules.Laybuy.Front'}"
-             width="250" height="56" class="img-fluid" />
-    </div>
-    <div class="col-md-8">
-        {l s='Spread the cost over 6 weekly, interest free payments of %s with Laybuy' sprintf=[$laybuyProductAmountByWeek] d='Modules.Laybuy.Front'}
+<div class="row py-2">
+    <div class="col-md-12">
+        {l s='Or 6 weekly interest free payments of %s with Laybuy' sprintf=[$laybuyProductAmountByWeek] d='Modules.Laybuy.Front'}
+
+        <img src="{$link->getMediaLink('/modules/laybuy/logo-grey-small.png')}" alt="{l s='Laybuy' d='Modules.Laybuy.Front'}"
+             width="70" height="16" />
     </div>
 </div>

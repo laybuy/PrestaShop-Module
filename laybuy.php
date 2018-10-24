@@ -149,7 +149,7 @@ class Laybuy extends PaymentModule
     {
         $result = parent::install()
             && $this->registerHook('paymentOptions')
-            && $this->registerHook('displayProductButtons')
+            && $this->registerHook('displayProductPriceBlock')
             && $this->registerHook('displayAdminOrderLeft');
 
         $query = '
@@ -526,8 +526,14 @@ class Laybuy extends PaymentModule
      *
      * @return array|bool
      */
-    public function hookDisplayProductButtons($params)
+    public function hookDisplayProductPriceBlock($params)
     {
+        // Check hook type
+        if (!isset($params['type'])
+            || 'after_price' !== $params['type']) {
+            return false;
+        }
+
         // Check cart
         if (isset($params['cart'])
             && Validate::isLoadedObject($params['cart'])
