@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <module>
     <name>laybuy</name>
-    <displayName><![CDATA[Laybuy payment]]></displayName>
-    <version><![CDATA[1.0.0]]></version>
+    <displayName><![CDATA[Laybuy for Prestashop]]></displayName>
+    <version><![CDATA[1.2.1]]></version>
     <description><![CDATA[Offer customers a seamless instalment payments option to spread the cost over 6 weeks, interest free.]]></description>
     <author><![CDATA[Laybuy]]></author>
     <tab><![CDATA[payments_gateways]]></tab>

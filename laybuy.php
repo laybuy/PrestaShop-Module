@@ -56,7 +56,7 @@ class Laybuy extends PaymentModule
     {
         $this->name = 'laybuy';
         $this->tab = 'payments_gateways';
-        $this->version = '1.1.0';
+        $this->version = '1.2.1';
         $this->author = 'Laybuy';
         $this->controllers = array('payment', 'validation');
 
